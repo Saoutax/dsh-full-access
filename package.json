@@ -1,6 +1,6 @@
 {
     "name": "@saoutax/dsh-full-access",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "Default every new session to Full access and drop the risk confirmation from the composer permission chip.",
     "license": "MIT",
     "repository": {
