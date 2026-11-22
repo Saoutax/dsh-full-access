@@ -6,11 +6,19 @@ name: release
 # commits merged since the last tag and proposes the next version plus a CHANGELOG
 # entry. Merging that PR is what creates the tag and the GitHub Release. The
 # `publish` job then builds that exact tag and attaches the installable plugin
-# tarball to the Release.
+# tarball, and `npm-publish` publishes the same tag to the registry.
+#
+# The workflow can also be started by hand with an existing tag, which retries a
+# failed packaging or registry step without creating another version.
 on:
     push:
         branches:
             - main
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: Existing tag to build, attach, and publish, such as v0.1.1
+                required: true
 
 # Releases are strictly serial: two overlapping runs would race on the release PR.
 concurrency:
@@ -25,6 +33,7 @@ permissions:
 jobs:
     release-please:
         name: version and tag
+        if: github.event_name == 'push'
         runs-on: ubuntu-latest
         timeout-minutes: 10
         outputs:
@@ -46,7 +55,9 @@ jobs:
     publish:
         name: build and attach the plugin package
         needs: release-please
-        if: needs.release-please.outputs.released == 'true'
+        # A push publishes the release release-please just created; a manual run
+        # publishes the tag it was started with.
+        if: always() && (needs.release-please.outputs.released == 'true' || inputs.tag != '')
         runs-on: ubuntu-latest
         timeout-minutes: 15
         permissions:
@@ -57,7 +68,7 @@ jobs:
             - name: Check out the released tag
               uses: actions/checkout@v7
               with:
-                  ref: ${{ needs.release-please.outputs.tag }}
+                  ref: ${{ inputs.tag || needs.release-please.outputs.tag }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v6
@@ -81,30 +92,38 @@ jobs:
             - name: Pack
               run: pnpm pack --pack-destination dist
 
+            # Invoked through bash: a Windows checkout can lose the executable
+            # bit, and the verification must still run.
             - name: Verify the package carries both halves
-              run: ./scripts/verify-package.sh
+              run: bash ./scripts/verify-package.sh
 
             - name: Attach the package to the release
               env:
                   GH_TOKEN: ${{ github.token }}
-                  TAG: ${{ needs.release-please.outputs.tag }}
+                  TAG: ${{ inputs.tag || needs.release-please.outputs.tag }}
               run: gh release upload "$TAG" dist/*.tgz --clobber
 
     npm-publish:
         name: publish to npm
         needs: release-please
-        if: needs.release-please.outputs.released == 'true'
+        if: always() && (needs.release-please.outputs.released == 'true' || inputs.tag != '')
         runs-on: ubuntu-latest
         timeout-minutes: 15
+        # The `npm-publish` environment is where the trusted-publisher trust
+        # relationship is scoped on npmjs.com (repository + this workflow file +
+        # this environment name). No npm token exists anywhere: `id-token` lets
+        # the npm CLI mint a short-lived credential instead.
+        environment: npm-publish
         permissions:
             contents: read
+            id-token: write
         steps:
             # Publish the tagged commit, not main, so the registry version always
             # matches the tag and the attached tarball.
             - name: Check out the released tag
               uses: actions/checkout@v7
               with:
-                  ref: ${{ needs.release-please.outputs.tag }}
+                  ref: ${{ inputs.tag || needs.release-please.outputs.tag }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v6
@@ -119,22 +138,17 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            # Trusted publishing needs npm CLI 11.5.1+; Node 24's bundled npm may
+            # be older, so it is pinned explicitly here rather than assumed.
+            - name: Update npm
+              run: npm install -g npm@latest
+
             # `lib/` is generated and git-ignored, so the bundle must be rebuilt
-            # before packing; `npm publish` would otherwise ship no plugin code.
+            # here, same as the `publish` job's own copy of this step.
             - name: Build
               run: pnpm run build
 
-            # npm cannot mint a short-lived credential for a package that does not
-            # exist yet, so the first release publishes with an automation token.
-            # After the package exists, a trusted publisher can replace this secret
-            # (repo, workflow `release.yml`, environment npm-publish) and the job
-            # can drop NODE_AUTH_TOKEN in favour of `id-token: write`.
+            # No token, no `--provenance` flag: trusted publishing authenticates
+            # this exact workflow run via OIDC and attaches provenance by default.
             - name: Publish to npm
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-              run: |
-                  if [ -z "${NODE_AUTH_TOKEN}" ]; then
-                      echo "::error::NPM_TOKEN secret is not configured; add an npm automation token with publish rights for the scope"
-                      exit 1
-                  fi
-                  npm publish --access public
+              run: npm publish --access public
