@@ -1,0 +1,12 @@
+{
+    "chip.aria": "Switch permission mode: {name}",
+    "chip.hint": "Click to choose the permission mode for this session",
+    "preset.readOnly": "Read Only",
+    "preset.workspaceWrite": "Workspace Write",
+    "preset.fullAccess": "Full access",
+    "auto.label": "Auto review",
+    "auto.badge": "EXP",
+    "auto.description": "Run without a sandbox after an experimental same-model review of every native tool call and PTC inner call.",
+    "menu.label": "Permission mode",
+    "menu.active": "Current mode"
+}

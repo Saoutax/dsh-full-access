@@ -1,0 +1,6 @@
+{
+    "meta": {
+        "title": "Full Access Default",
+        "description": "Starts new sessions in Full access and drops the risk confirmation from the composer permission chip."
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "chip.aria": "切换权限模式：{name}",
+    "chip.hint": "点击选择此会话的权限模式",
+    "preset.readOnly": "仅可查看",
+    "preset.workspaceWrite": "工作区内修改",
+    "preset.fullAccess": "完全权限",
+    "auto.label": "自动审查",
+    "auto.badge": "EXP",
+    "auto.description": "无沙箱运行；每次原生工具调用和 PTC 内层调用前，由与当前 agent 相同的模型进行实验性审查。",
+    "menu.label": "权限模式",
+    "menu.active": "当前模式"
+}

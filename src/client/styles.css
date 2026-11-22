@@ -1,0 +1,195 @@
+/*
+ * Styles of the composer permission chip and its popup.
+ *
+ * Both surfaces reproduce the shipped declarations with the plugin's own class
+ * prefix: the chip copies the permission plugin's stylesheet, the popup copies
+ * the menu primitive's list and item rules. Every color and radius goes through
+ * the host theme variables, each with a fallback so a missing token degrades to
+ * a close value instead of breaking the control.
+ */
+
+.dshFullAccess_trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    max-width: 220px;
+    height: 28px;
+    padding: 0 4px 0 8px;
+    border: none;
+    border-radius: var(--dsw-radius-sm, 8px);
+    outline: none;
+    background: transparent;
+    color: var(--dsw-alias-label-secondary, #5f6368);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .dshFullAccess_trigger:hover:not(:disabled) {
+        background: var(--dsw-alias-interactive-bg-hover, #2631480f);
+    }
+}
+
+.dshFullAccess_trigger:focus-visible {
+    box-shadow: 0 0 0 2px
+        var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary, #4d6bfe));
+}
+
+.dshFullAccess_trigger:disabled {
+    color: var(--dsw-alias-label-dimmed, #c7cbd4);
+    cursor: default;
+}
+
+.dshFullAccess_triggerIcon {
+    display: inline-flex;
+    flex: none;
+}
+
+.dshFullAccess_triggerIcon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.dshFullAccess_triggerLabel {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.dshFullAccess_chevron {
+    display: inline-flex;
+    flex: none;
+    color: var(--dsw-alias-label-caption, #9aa0aa);
+    transition: transform 0.12s;
+}
+
+.dshFullAccess_chevronOpen {
+    transform: rotate(180deg);
+}
+
+.dshFullAccess_popup {
+    position: fixed;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    box-sizing: border-box;
+    min-width: min(144px, 100vw);
+    max-width: min(360px, 100vw);
+    padding: 4px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: var(--dsw-radius-lg, 16px);
+    outline: none;
+    background: var(--dsw-menu-surface-fill, var(--dsw-alias-bg-overlay, #fff));
+    backdrop-filter: var(--dsw-menu-backdrop-filter, blur(40px) saturate(150%));
+    box-shadow:
+        var(--dsw-elevation-prominent, 0 3px 8px 0 #0000000a),
+        0 0 20px 0 #0000000d;
+    animation: dshFullAccessMenuIn var(--dsh-menu-enter, 120ms) ease-out;
+}
+
+@keyframes dshFullAccessMenuIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dshFullAccess_popup {
+        animation-duration: 0ms;
+    }
+}
+
+.dshFullAccess_option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 8px;
+    border: none;
+    border-radius: var(--dsw-radius-md, 12px);
+    background: transparent;
+    color: var(--dsw-alias-label-primary, #1c1e23);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: left;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .dshFullAccess_option:hover:not(:disabled) {
+        background: var(--dsw-alias-interactive-bg-hover, #2631480f);
+    }
+}
+
+.dshFullAccess_optionHighlight,
+.dshFullAccess_option:focus-visible {
+    background: var(--dsw-alias-interactive-bg-hover, #2631480f);
+    outline: none;
+}
+
+.dshFullAccess_optionIcon {
+    display: inline-flex;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    align-items: center;
+    justify-content: center;
+    color: var(--dsw-alias-menu-icon, #3a3f48);
+}
+
+.dshFullAccess_optionIcon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.dshFullAccess_optionLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.dshFullAccess_optionLabelText {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.dshFullAccess_optionBadge {
+    flex: none;
+    color: var(--dsw-alias-label-tertiary, #7b818c);
+    font-size: 8px;
+    font-weight: 500;
+    line-height: 10px;
+    letter-spacing: 0.2px;
+}
+
+.dshFullAccess_optionCheck {
+    display: inline-flex;
+    flex: none;
+    color: var(--dsw-alias-label-primary, #1c1e23);
+}
+
+.dshFullAccess_optionCheck svg {
+    width: 14px;
+    height: 14px;
+}
+
+@container (width <= 460px) {
+    .dshFullAccess_trigger:has(.dshFullAccess_triggerIcon) .dshFullAccess_triggerLabel {
+        display: none;
+    }
+}

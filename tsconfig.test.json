@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "ES2023",
+        "lib": ["ES2023"],
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": true,
+        "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "types": ["node"]
+    },
+    "include": [
+        "src/shared.ts",
+        "src/icons.ts",
+        "src/host/config.ts",
+        "src/host/policy.ts",
+        "src/client/catalog.ts",
+        "src/client/contracts.ts",
+        "src/client/presentation.ts",
+        "src/client/store.ts",
+        "tests/**/*.ts"
+    ]
+}
