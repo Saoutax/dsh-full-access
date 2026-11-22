@@ -4,6 +4,11 @@
 
 一个 DeepSeek Harness 插件，做两件事：新会话默认使用**完全权限**；输入框的权限芯片切换模式时不再弹额外的风险确认。
 
+> [!CAUTION]
+> 安装前请确认你清楚自己在做什么。本插件让新会话默认进入「完全权限」，并去掉输入框切换时的风险确认。
+>
+> 完全权限不启用沙箱，也不逐次征求批准：模型可以直接读写当前操作系统账号能访问的文件、执行命令，并影响这台机器和网络。误删、误改文件，或把本机数据发送出去，都可能在这个模式下发生，且不一定能撤销。请先做好备份、把重要内容纳入版本控制，或在隔离环境里运行。不建议纯新手安装；不确定这些风险意味着什么时，先不要启用。停用本插件会恢复官方的默认权限与确认流程。
+
 ## 改变的行为
 
 - **新会话默认值。** Agent 为新对话创建时，插件把配置的预设（默认 `danger-full-access`）写入该会话。恢复的会话、压缩后的会话和带种子的分叉保留它们继承的权限。
@@ -25,23 +30,6 @@ dsh plugin --profile web add @saoutax/dsh-full-access
 Plugin Manager 也支持从目录或打包好的 `.tgz` 安装，适合离线安装与本地开发。
 
 安装后插件立即生效，页面会重建客户端模块图，输入框芯片替换为我们的控件。
-
-## 配置
-
-| 字段            | 默认值               | 含义                     |
-| --------------- | -------------------- | ------------------------ |
-| `defaultPreset` | `danger-full-access` | 写入每个新建对话的预设。 |
-
-这一行位于 profile 的 `cordis.patch.yml`：
-
-```yaml
-- id: full-access
-  name: '@saoutax/dsh-full-access'
-  config:
-      defaultPreset: danger-full-access
-```
-
-预设必须是本部署通过 `@deepseek-ai/dsh-permission-presets` 发布过的名字。如果不在目录里，插件会在激活时记录一条警告，新会话继续使用组合配置的默认权限。
 
 ## 兼容性与维护
 
@@ -70,8 +58,6 @@ pnpm run lint      # 语法 lint
 ## 发布
 
 每次推送到 `main` 都会运行 CI。在 `main` 上，[release-please](https://github.com/googleapis/release-please) 会保持一个发布 PR，包含下一个版本号与 CHANGELOG 条目。合并该 PR 后创建 tag 与 GitHub Release，附加打包好的 `.tgz`，并把同一个 tag 发布到 npm。
-
-npm 作业需要仓库 secret `NPM_TOKEN`：一个有 `@saoutax` 作用域发布权限的 npm automation token。包在 npm 上存在之后，可以改用 trusted publisher（仓库 `Saoutax/dsh-full-access`、workflow `release.yml`、environment `npm-publish`）替代 token，工作流注释里写了具体位置。
 
 ## 图标
 

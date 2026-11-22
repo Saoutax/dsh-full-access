@@ -4,6 +4,11 @@ English | [简体中文](README.zh.md)
 
 A DeepSeek Harness plugin with two jobs: every new session starts in **Full access**, and the composer's permission chip switches modes without the extra risk confirmation.
 
+> [!CAUTION]
+> Confirm you understand what you are doing before installing. This plugin starts new sessions in Full access and removes the risk confirmation from the composer switch.
+>
+> Full access runs without a sandbox and does not ask for approval per action: the model can read and write any file the current OS account can reach, run commands, and affect this machine and its network. Accidental deletion, unwanted edits, or data leaving the machine can happen in this mode, and are not always reversible. Back up first, keep important data under version control, or run in an isolated environment. Not recommended for complete beginners; do not enable it while you are unsure what these risks mean. Disabling the plugin restores the shipped default permission and confirmation flow.
+
 ## What it changes
 
 - **New-session default.** When an Agent is created for a new conversation, the plugin pins the configured preset (default `danger-full-access`) onto that session. Resumed sessions, compacted sessions, and seeded forks keep the permission they inherited.
@@ -25,23 +30,6 @@ dsh plugin --profile web add @saoutax/dsh-full-access
 The Plugin Manager also installs a bundle from a directory or a packed `.tgz`, which is useful for offline installs and local development.
 
 After installation the plugin runs immediately; the Web page reloads its client graph and the composer chip appears in place of the shipped one.
-
-## Configuration
-
-| Field           | Default              | Meaning                                              |
-| --------------- | -------------------- | ---------------------------------------------------- |
-| `defaultPreset` | `danger-full-access` | Preset pinned into every newly created conversation. |
-
-The row lives in the profile's `cordis.patch.yml`:
-
-```yaml
-- id: full-access
-  name: '@saoutax/dsh-full-access'
-  config:
-      defaultPreset: danger-full-access
-```
-
-The preset has to be one the deployment publishes through `@deepseek-ai/dsh-permission-presets`. When it is not, the plugin logs a warning at activation and leaves new sessions on the composed default.
 
 ## Compatibility and maintenance
 
@@ -70,8 +58,6 @@ pnpm run lint      # syntax lint
 ## Releases
 
 Every push to `main` runs CI. On `main`, [release-please](https://github.com/googleapis/release-please) keeps one release PR open with the next version and the CHANGELOG entry. Merging that PR creates the tag and the GitHub Release, attaches the packed `.tgz`, and publishes that exact tag to npm.
-
-The npm job needs a repository secret `NPM_TOKEN`: an npm automation token with publish rights for the `@saoutax` scope. Once the package exists on npm, a trusted publisher (repository `Saoutax/dsh-full-access`, workflow `release.yml`, environment `npm-publish`) can replace the token; see the comment in the workflow.
 
 ## Icons
 
