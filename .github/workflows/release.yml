@@ -89,3 +89,52 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
                   TAG: ${{ needs.release-please.outputs.tag }}
               run: gh release upload "$TAG" dist/*.tgz --clobber
+
+    npm-publish:
+        name: publish to npm
+        needs: release-please
+        if: needs.release-please.outputs.released == 'true'
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        permissions:
+            contents: read
+        steps:
+            # Publish the tagged commit, not main, so the registry version always
+            # matches the tag and the attached tarball.
+            - name: Check out the released tag
+              uses: actions/checkout@v7
+              with:
+                  ref: ${{ needs.release-please.outputs.tag }}
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v6
+
+            - name: Install Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+                  cache: pnpm
+                  registry-url: https://registry.npmjs.org
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            # `lib/` is generated and git-ignored, so the bundle must be rebuilt
+            # before packing; `npm publish` would otherwise ship no plugin code.
+            - name: Build
+              run: pnpm run build
+
+            # npm cannot mint a short-lived credential for a package that does not
+            # exist yet, so the first release publishes with an automation token.
+            # After the package exists, a trusted publisher can replace this secret
+            # (repo, workflow `release.yml`, environment npm-publish) and the job
+            # can drop NODE_AUTH_TOKEN in favour of `id-token: write`.
+            - name: Publish to npm
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: |
+                  if [ -z "${NODE_AUTH_TOKEN}" ]; then
+                      echo "::error::NPM_TOKEN secret is not configured; add an npm automation token with publish rights for the scope"
+                      exit 1
+                  fi
+                  npm publish --access public

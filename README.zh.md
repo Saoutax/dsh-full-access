@@ -67,6 +67,12 @@ pnpm run lint      # 语法 lint
 - `src/host/` 构建为 `lib/index.js`（ESM）。Harness 包保持 external，运行时从 dsh 安装目录解析。
 - `src/client/` 构建为 `lib/client.js`，包成 `window.__ModuleLoader__.load({ id, factory })` 注册。React 与 ReactDOM 来自页面的模块表；芯片字形内置在插件里。
 
+## 发布
+
+每次推送到 `main` 都会运行 CI。在 `main` 上，[release-please](https://github.com/googleapis/release-please) 会保持一个发布 PR，包含下一个版本号与 CHANGELOG 条目。合并该 PR 后创建 tag 与 GitHub Release，附加打包好的 `.tgz`，并把同一个 tag 发布到 npm。
+
+npm 作业需要仓库 secret `NPM_TOKEN`：一个有 `@saoutax` 作用域发布权限的 npm automation token。包在 npm 上存在之后，可以改用 trusted publisher（仓库 `Saoutax/dsh-full-access`、workflow `release.yml`、environment `npm-publish`）替代 token，工作流注释里写了具体位置。
+
 ## 图标
 
 芯片与菜单字形复制自 DeepSeek Harness 自带的图标集（MIT），让控件看起来与被替换的官方控件一致。插件自己的 `icon.svg` 在构建时由 [Lucide](https://lucide.dev) 图标数据生成（`unlock-keyhole`）；Lucide 使用 [ISC 许可证](https://lucide.dev/license)，只在构建阶段使用，不会打进客户端产物。

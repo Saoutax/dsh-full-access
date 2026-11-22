@@ -67,6 +67,12 @@ pnpm run lint      # syntax lint
 - `src/host/` builds to `lib/index.js` (ESM). Harness packages stay external and resolve from the dsh installation.
 - `src/client/` builds to `lib/client.js`, wrapped as a `window.__ModuleLoader__.load({ id, factory })` registration. React and ReactDOM come from the page's module table; the chip glyphs are inlined from the shipped design set.
 
+## Releases
+
+Every push to `main` runs CI. On `main`, [release-please](https://github.com/googleapis/release-please) keeps one release PR open with the next version and the CHANGELOG entry. Merging that PR creates the tag and the GitHub Release, attaches the packed `.tgz`, and publishes that exact tag to npm.
+
+The npm job needs a repository secret `NPM_TOKEN`: an npm automation token with publish rights for the `@saoutax` scope. Once the package exists on npm, a trusted publisher (repository `Saoutax/dsh-full-access`, workflow `release.yml`, environment `npm-publish`) can replace the token; see the comment in the workflow.
+
 ## Icons
 
 The chip and menu glyphs reproduce the icon set that ships with DeepSeek Harness (MIT), so the control looks like the one it replaces. The plugin's own `icon.svg` is generated at build time from [Lucide](https://lucide.dev) icon data (`unlock-keyhole`); Lucide is licensed under the [ISC License](https://lucide.dev/license) and is used only by the build, never bundled into the client half.
